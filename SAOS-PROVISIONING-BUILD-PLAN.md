@@ -435,6 +435,36 @@ Body: { "received": true, "client_id": {{ client_id }} }
 **API Key:** Must exist in environment or credential store.  
 **Permissions needed:** `compute:write`, `compute:read`, `startup:read`
 
+### Tailscale Architecture for Multi-Client
+
+**Problem:** Tailscale free tier = 6 users max. 20 clients = 20 users = need paid plan.
+
+**Solution: Tagged Devices**
+- Each client VPS = 1 **tagged device** (NOT a user seat)
+- Clients access via **Tailscale Serve URLs** (no user account needed)
+- Admin (you) = 1 user seat
+- Clients don't need Tailscale accounts at all
+
+**Architecture:**
+```
+Your Tailnet (Systack)
+├── You (1 user seat)
+├── Systack VPS (tag: infrastructure)
+├── Client VPS #1 (tag: saos-client)
+├── Client VPS #2 (tag: saos-client)
+└── ...
+```
+
+**Access Methods:**
+| Method | Requirement | Cost |
+|--------|-------------|------|
+| **Tailscale Serve URL** | None (public URL via MagicDNS) | Free |
+| **Tailscale Funnel** | None (public HTTPS) | Free |
+| **Tailscale SSH** | Your device on tailnet | Free |
+| **Client Tailscale App** | User account (counts toward limit) | $8/seat if >6 |
+
+**Recommendation:** Use Tailscale Serve/Funnel for client access. Only give Tailscale accounts to clients who need direct SSH/VPN access.
+
 ### Provisioning Script Structure
 
 **File:** `scripts/provision_vps.py`

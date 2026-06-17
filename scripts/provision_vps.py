@@ -155,9 +155,16 @@ runcmd:
   - systemctl enable fail2ban
   - systemctl start fail2ban
   
-  # Signal completion via webhook (if provisioning API is reachable)
   - |
-    TAILSCALE_IP=$(tailscale ip -4 2>/dev/null || echo "unknown")
+    # Configure Tailscale Serve for public HTTPS access (MagicDNS)
+    tailscale serve --https=443 off 2>/dev/null || true
+    tailscale serve --https=443 / http://localhost:5678
+    tailscale funnel --https=443 on 2>/dev/null || true
+    
+    # Get Tailscale URL for webhook
+    TAILSCALE_URL=$(tailscale status --json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName',''))" || echo "")
+    
+    # Signal completion via webhook
     curl -X POST "https://n8n.systack.net/webhook/saas-vps-ready" \\
       -H "Content-Type: application/json" \\
       -d '{{"client_id":"{client_id}","vps_ip":"'$(curl -s ifconfig.me)'","tailscale_ip":"'"$TAILSCALE_IP"'","status":"ready","timestamp":"'$(date -Iseconds)'"}}' \\
