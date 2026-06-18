@@ -50,7 +50,12 @@ class TemplateDeployer:
     
     def __init__(self, n8n_url: str, n8n_api_key: str = None):
         self.n8n_url = n8n_url.rstrip('/')
-        self.api_key = n8n_api_key or os.environ.get("N8N_API_KEY")
+        if n8n_api_key:
+            self.api_key = n8n_api_key
+        else:
+            from provision_vps import load_credentials
+            creds = load_credentials()
+            self.api_key = creds.get('n8n') or os.environ.get("N8N_API_KEY")
         self.headers = {}
         if self.api_key:
             self.headers["X-N8N-API-KEY"] = self.api_key

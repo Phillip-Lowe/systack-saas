@@ -194,7 +194,7 @@ def generate_identity(client_id, name, email, contact_name="", timezone="America
 
 def main():
     parser = argparse.ArgumentParser(description="Generate SAOS client identity files")
-    parser.add_argument("--client-id", required=True, type=int)
+    parser.add_argument("--client-id", required=True)
     parser.add_argument("--name", required=True)
     parser.add_argument("--email", required=True)
     parser.add_argument("--contact-name", default="")

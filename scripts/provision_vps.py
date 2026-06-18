@@ -24,6 +24,66 @@ import argparse
 import requests
 from datetime import datetime
 
+# ─── Credential Loading ───────────────────────────────────────────────────
+
+def load_credentials():
+    """Load API keys from credential files or environment.
+    
+    Credential files may have a header line (e.g. 'VULTR API') followed by
+    blank lines, then the actual key. This extracts the last non-empty line
+    as the key value.
+    """
+    creds = {}
+    
+    def extract_key(filepath):
+        """Extract the actual API key from a credential file."""
+        if not os.path.exists(filepath):
+            return None
+        with open(filepath, 'r') as f:
+            lines = [line.strip() for line in f.readlines() if line.strip()]
+        # Return the last line (the actual key, skipping header lines)
+        return lines[-1] if lines else None
+    
+    # Vultr API key
+    vultr_path = os.path.expanduser("~/.openclaw/workspaces/sol/credentials/Green/Vultr/VULTR API")
+    creds['vultr'] = extract_key(vultr_path) or os.environ.get("VULTR_API_KEY")
+    
+    # Tailscale auth key (for client VPS to join tailnet)
+    ts_auth_path = os.path.expanduser("~/.openclaw/workspaces/sol/credentials/Green/Tailscale/Tailscale Auth Key")
+    creds['tailscale_auth'] = extract_key(ts_auth_path) or os.environ.get("TAILSCALE_AUTH_KEY")
+    
+    # Tailscale API key (for management operations)
+    ts_api_path = os.path.expanduser("~/.openclaw/workspaces/sol/credentials/Green/Tailscale/Tailscal API")
+    creds['tailscale_api'] = extract_key(ts_api_path) or os.environ.get("TAILSCALE_API_KEY")
+    
+    # n8n API key
+    n8n_path = os.path.expanduser("~/.openclaw/workspaces/sol/credentials/Green/n8n/n8n Openclaw api")
+    creds['n8n'] = extract_key(n8n_path) or os.environ.get("N8N_API_KEY")
+    
+    return creds
+    for path in tailscale_paths:
+        if os.path.exists(path):
+            with open(path, 'r') as f:
+                creds['tailscale'] = f.read().strip()
+            break
+    if not creds.get('tailscale'):
+        creds['tailscale'] = os.environ.get('TAILSCALE_AUTH_KEY')
+    
+    # n8n API key
+    n8n_paths = [
+        os.path.expanduser("~/.openclaw/workspaces/sol/credentials/Green/n8n/n8n Openclaw api"),
+        os.path.expanduser("~/.openclaw/workspaces/sol/.n8n_api_key"),
+    ]
+    for path in n8n_paths:
+        if os.path.exists(path):
+            with open(path, 'r') as f:
+                creds['n8n'] = f.read().strip()
+            break
+    if not creds.get('n8n'):
+        creds['n8n'] = os.environ.get('N8N_API_KEY')
+    
+    return creds
+
 # ─── Configuration ──────────────────────────────────────────────────────────
 
 VULTR_API_BASE = "https://api.vultr.com/v2"
@@ -162,7 +222,7 @@ runcmd:
     tailscale funnel --https=443 on 2>/dev/null || true
     
     # Get Tailscale URL for webhook
-    TAILSCALE_URL=$(tailscale status --json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName',''))" || echo "")
+    TAILSCALE_URL=$(tailscale status --json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('Self',{{}}).get('DNSName',''))" || echo "")
     
     # Signal completion via webhook
     curl -X POST "https://n8n.systack.net/webhook/saas-vps-ready" \\
@@ -196,9 +256,13 @@ class VultrProvisioner:
     """Handles Vultr VPS creation and management."""
     
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.environ.get("VULTR_API_KEY")
+        if api_key:
+            self.api_key = api_key
+        else:
+            creds = load_credentials()
+            self.api_key = creds.get('vultr') or os.environ.get("VULTR_API_KEY")
         if not self.api_key:
-            raise ValueError("VULTR_API_KEY required. Set env var or pass --api-key.")
+            raise ValueError("VULTR_API_KEY required. Set env var, pass --api-key, or add to credentials folder.")
         
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -306,11 +370,11 @@ class VultrProvisioner:
 
 def main():
     parser = argparse.ArgumentParser(description="SAOS VPS Provisioning")
-    parser.add_argument("--client-id", required=True, help="SAOS client ID")
+    parser.add_argument("--client-id", help="SAOS client ID (required for create)")
     parser.add_argument("--tier", default="business", choices=["business", "enterprise", "test"],
                        help="SAOS tier")
     parser.add_argument("--agent-name", default="saos-agent", help="Agent name for the client")
-    parser.add_argument("--email", required=True, help="Client email")
+    parser.add_argument("--email", help="Client email (required for create)")
     parser.add_argument("--region", help="Override region (default: ord)")
     parser.add_argument("--api-key", help="Vultr API key (or set VULTR_API_KEY env)")
     parser.add_argument("--tailscale-key", help="Tailscale auth key (or set TAILSCALE_AUTH_KEY env)")
@@ -321,8 +385,15 @@ def main():
     
     args = parser.parse_args()
     
+    # Load credentials from files
+    creds = load_credentials()
+    
+    # Use provided args first, then credential files, then env vars
+    api_key = args.api_key or creds.get('vultr') or os.environ.get("VULTR_API_KEY")
+    tailscale_key = args.tailscale_key or creds.get('tailscale_auth') or os.environ.get("TAILSCALE_AUTH_KEY")
+    
     # Initialize provisioner
-    provisioner = VultrProvisioner(api_key=args.api_key)
+    provisioner = VultrProvisioner(api_key=api_key)
     
     # List mode
     if args.list:
@@ -344,8 +415,7 @@ def main():
         provisioner.destroy_instance(args.destroy)
         return
     
-    # Get Tailscale auth key
-    tailscale_key = args.tailscale_key or os.environ.get("TAILSCALE_AUTH_KEY")
+    # Validate Tailscale auth key
     if not tailscale_key:
         print("⚠️  Warning: No Tailscale auth key provided. Client will need manual Tailscale setup.")
         tailscale_key = "PLACEHOLDER"
