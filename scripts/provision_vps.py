@@ -133,7 +133,7 @@ TIER_PLANS = {
         "description": "Business Fleet - 8 vCPU, 16GB RAM"
     },
     "enterprise": {
-        "plan": "vhf-8c-32gb",  # 8 vCPU, 32GB RAM - more RAM for enterprise
+        "plan": "voc-g-8c-32gb-160s-amd",  # 8 vCPU, 32GB RAM - Vultr Optimized Cloud
         "region": "ord",
         "os_id": UBUNTU_22_04_OS_ID,
         "description": "Enterprise Fleet - 8 vCPU, 32GB RAM + Dedicated Support"
