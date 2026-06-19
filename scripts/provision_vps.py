@@ -127,16 +127,16 @@ REGIONS = {
 # vhp-4c-16gb = High Performance, 4 vCPU, 16GB RAM ($96/mo)
 TIER_PLANS = {
     "business": {
-        "plan": "vhp-4c-16gb",
-        "region": "ord",  # Chicago (closest to Little Rock)
-        "os_id": UBUNTU_22_04_OS_ID,
-        "description": "Business Fleet - 4 vCPU, 16GB RAM"
-    },
-    "enterprise": {
-        "plan": "vhp-4c-16gb",
+        "plan": "vhp-8c-16gb",  # 8 vCPU, 16GB RAM - both tiers use 8 cores
         "region": "ord",
         "os_id": UBUNTU_22_04_OS_ID,
-        "description": "Enterprise Fleet - 4 vCPU, 16GB RAM + Dedicated Support"
+        "description": "Business Fleet - 8 vCPU, 16GB RAM"
+    },
+    "enterprise": {
+        "plan": "vhf-8c-32gb",  # 8 vCPU, 32GB RAM - more RAM for enterprise
+        "region": "ord",
+        "os_id": UBUNTU_22_04_OS_ID,
+        "description": "Enterprise Fleet - 8 vCPU, 32GB RAM + Dedicated Support"
     },
     # Test tier for development (cheapest)
     "test": {
