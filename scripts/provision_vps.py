@@ -181,137 +181,67 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh_authorized_keys: []
 
-# Two-stage boot: install on first boot, finalize + webhook on second boot
+# First boot: install dependencies, enable second-stage service, schedule reboot
 runcmd:
-  # Use /var/lib/cloud/instance/ for log persistence across reboots
+  # Initialize log
   - |
     echo "=== SAOS Provisioning Started ===" > /var/lib/cloud/instance/saas-provision.log
     date >> /var/lib/cloud/instance/saas-provision.log
+    echo "=== Installing dependencies ===" >> /var/lib/cloud/instance/saas-provision.log
   
-  # ── Stage detection ─────────────────────────────────────────────────
+  # Block until network is actually usable (30 retries x 5s = 150s max)
   - |
-    FIRST_BOOT="/var/lib/cloud/instance/saos-first-boot-done"
-    if [ -f "$FIRST_BOOT" ]; then
-      echo "=== Second boot detected — finalizing services ===" >> /var/lib/cloud/instance/saas-provision.log
-      IS_SECOND_BOOT=true
-    else
-      echo "=== First boot detected — installing dependencies ===" >> /var/lib/cloud/instance/saas-provision.log
-      touch "$FIRST_BOOT"
-      IS_SECOND_BOOT=false
-    fi
-    export IS_SECOND_BOOT
-  
-  # ── Stage 1: Install dependencies (first boot only) ──────────────────
-  - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      # Block until network is actually usable (30 retries x 5s = 150s max)
-      for i in $(seq 1 30); do
-        curl -fsSL --connect-timeout 3 https://tailscale.com >/dev/null 2>&1 && \
-          echo "Network ready on attempt $i" >> /var/lib/cloud/instance/saas-provision.log && break
-        echo "Network not ready, retry $i/30..." >> /var/lib/cloud/instance/saas-provision.log
-        sleep 5
-      done
-    fi
+    for i in $(seq 1 30); do
+      curl -fsSL --connect-timeout 3 https://tailscale.com >/dev/null 2>&1 && \
+        echo "Network ready on attempt $i" >> /var/lib/cloud/instance/saas-provision.log && break
+      echo "Network not ready, retry $i/30..." >> /var/lib/cloud/instance/saas-provision.log
+      sleep 5
+    done
   
   # Install Tailscale
   - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      curl -fsSL https://tailscale.com/install.sh | sh
-      tailscale up --authkey {tailscale_auth_key} --hostname saos-{client_id} --advertise-tags tag:saos-client >> /var/lib/cloud/instance/saas-provision.log 2>&1
-    fi
+    curl -fsSL https://tailscale.com/install.sh | sh
+    tailscale up --authkey {tailscale_auth_key} --hostname saos-{client_id} --advertise-tags tag:saos-client >> /var/lib/cloud/instance/saas-provision.log 2>&1
   
-  # Install Ollama + enable service
+  # Install Ollama
   - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      curl -fsSL https://ollama.com/install.sh | sh
-      systemctl enable ollama
-      # Don't pull model yet — group fix + reboot needed first
-      echo "Ollama installed, model pull deferred to second boot" >> /var/lib/cloud/instance/saas-provision.log
-    fi
+    curl -fsSL https://ollama.com/install.sh | sh
+    systemctl enable ollama
+    echo "Ollama installed" >> /var/lib/cloud/instance/saas-provision.log
   
   # Install OpenClaw
   - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      # Retry OpenClaw install with exponential backoff
-      for attempt in 1 2 3; do
-        mkdir -p /opt/openclaw && cd /opt/openclaw
-        curl -fsSL --connect-timeout 10 --max-time 60 https://get.openclaw.ai | bash >> /var/lib/cloud/instance/saas-provision.log 2>&1
-        if [ $? -eq 0 ]; then
-          echo "OpenClaw installed on attempt $attempt" >> /var/lib/cloud/instance/saas-provision.log
-          break
-        fi
-        echo "OpenClaw install attempt $attempt failed, retrying in ${{attempt}}0s..." >> /var/lib/cloud/instance/saas-provision.log
-        sleep ${{attempt}}0
-      done
-      if [ ! -d /opt/openclaw/bin ]; then
-        echo "OpenClaw install failed after 3 attempts - manual required" >> /var/lib/cloud/instance/saas-provision.log
+    for attempt in 1 2 3; do
+      mkdir -p /opt/openclaw && cd /opt/openclaw
+      curl -fsSL --connect-timeout 10 --max-time 60 https://get.openclaw.ai | bash >> /var/lib/cloud/instance/saas-provision.log 2>&1
+      if [ $? -eq 0 ]; then
+        echo "OpenClaw installed on attempt $attempt" >> /var/lib/cloud/instance/saas-provision.log
+        break
       fi
+      echo "OpenClaw install attempt $attempt failed, retrying in ${{attempt}}0s..." >> /var/lib/cloud/instance/saas-provision.log
+      sleep ${{attempt}}0
+    done
+    if [ ! -d /opt/openclaw/bin ]; then
+      echo "OpenClaw install failed after 3 attempts - manual required" >> /var/lib/cloud/instance/saas-provision.log
     fi
   
   # Configure firewall
   - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      ufw allow 22/tcp
-      ufw allow 80/tcp
-      ufw allow 443/tcp
-      ufw allow 5678/tcp
-      ufw allow 11434/tcp
-      ufw allow 18789/tcp
-      ufw --force enable
-      systemctl enable fail2ban
-      systemctl start fail2ban
-    fi
+    ufw allow 22/tcp
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw allow 5678/tcp
+    ufw allow 11434/tcp
+    ufw allow 18789/tcp
+    ufw --force enable
+    systemctl enable fail2ban
+    systemctl start fail2ban
   
-  # ── Stage 2: Finalize services (second boot only) ──────────────────
+  # Enable second-stage service and schedule reboot
   - |
-    if [ "$IS_SECOND_BOOT" = "true" ]; then
-      # Fix Docker group membership — write file via cloud-init write_files instead of heredoc
-      systemctl daemon-reload
-      systemctl enable saos-docker-group-fix
-      systemctl start saos-docker-group-fix
-      
-      # Pull model now that groups are settled — background so boot isn't blocked
-      sudo -u systack -H ollama pull qwen2.5:7b >> /var/lib/cloud/instance/saas-provision.log 2>&1 &
-      MODEL_PID=$!
-      
-      # Start n8n (if installed via OpenClaw or separately)
-      if command -v n8n >/dev/null 2>&1; then
-        systemctl enable n8n 2>/dev/null || true
-        systemctl start n8n 2>/dev/null || true
-      fi
-      
-      # Configure Tailscale Serve
-      tailscale serve --https=443 off 2>/dev/null || true
-      tailscale serve --https=443 / http://localhost:5678
-      tailscale funnel --https=443 on 2>/dev/null || true
-      
-      # Get Tailscale IP for webhook
-      TAILSCALE_IP=$(tailscale ip -4 2>/dev/null || echo "unknown")
-      VPS_IP=$(curl -s --connect-timeout 5 ifconfig.me 2>/dev/null || echo "unknown")
-      
-      # Wait for model pull to finish before declaring ready
-      wait $MODEL_PID 2>/dev/null || true
-      
-      # Signal completion via webhook with retry
-      for i in $(seq 1 5); do
-        curl -fsSL -X POST "https://n8n.systack.net/webhook/saos-provision" \
-          -H "Content-Type: application/json" \
-          -d "{{\"client_id\":\"{client_id}\",\"vps_ip\":\"$VPS_IP\",\"tailscale_ip\":\"$TAILSCALE_IP\",\"status\":\"ready\",\"timestamp\":\"$(date -Iseconds)\",\"boot_stage\":\"second\"}}" \
-          && break
-        echo "Webhook attempt $i/5 failed, retrying in 10s..." >> /var/lib/cloud/instance/saas-provision.log
-        sleep 10
-      done
-      
-      echo "=== SAOS Provisioning Complete ===" >> /var/lib/cloud/instance/saas-provision.log
-      date >> /var/lib/cloud/instance/saas-provision.log
-    fi
-  
-  # ── Stage 1 exit: schedule reboot ─────────────────────────────────
-  - |
-    if [ "$IS_SECOND_BOOT" != "true" ]; then
-      echo "First boot complete — scheduling reboot in 60s" >> /var/lib/cloud/instance/saas-provision.log
-      (sleep 60 && reboot) &
-    fi
+    systemctl enable saos-second-stage.service
+    echo "First boot complete — scheduling reboot in 60s" >> /var/lib/cloud/instance/saas-provision.log
+    (sleep 60 && reboot) &
 
 write_files:
   - path: /etc/systemd/system/saos-docker-group-fix.service
@@ -328,6 +258,75 @@ write_files:
       WantedBy=multi-user.target
     owner: root:root
     permissions: '0644'
+
+  # Second-stage service: runs after reboot to finalize provisioning
+  - path: /etc/systemd/system/saos-second-stage.service
+    content: |
+      [Unit]
+      Description=SAOS Second Stage Provisioning
+      After=network-online.target ollama.service docker.service tailscaled.service
+      Wants=network-online.target
+      Requires=ollama.service docker.service tailscaled.service
+      [Service]
+      Type=oneshot
+      Environment="CLIENT_ID={client_id}"
+      Environment="TIER={tier}"
+      Environment="AGENT_NAME={agent_name}"
+      ExecStart=/usr/local/bin/saos-second-stage.sh
+      RemainAfterExit=yes
+      StandardOutput=append:/var/lib/cloud/instance/saas-provision.log
+      StandardError=append:/var/lib/cloud/instance/saas-provision.log
+      [Install]
+      WantedBy=multi-user.target
+    owner: root:root
+    permissions: '0644'
+
+  # Second-stage script: model pull, tailscale serve, webhook
+  - path: /usr/local/bin/saos-second-stage.sh
+    content: |
+      #!/bin/bash
+      set -e
+      echo "=== Second boot detected — finalizing services ===" >> /var/lib/cloud/instance/saas-provision.log
+      date >> /var/lib/cloud/instance/saas-provision.log
+      
+      # Fix Docker group membership
+      systemctl daemon-reload
+      systemctl enable saos-docker-group-fix
+      systemctl start saos-docker-group-fix
+      
+      # Pull model
+      sudo -u systack -H ollama pull qwen2.5:7b >> /var/lib/cloud/instance/saas-provision.log 2>&1
+      echo "Model pulled" >> /var/lib/cloud/instance/saas-provision.log
+      
+      # Start n8n if installed
+      if command -v n8n >/dev/null 2>&1; then
+        systemctl enable n8n 2>/dev/null || true
+        systemctl start n8n 2>/dev/null || true
+      fi
+      
+      # Configure Tailscale Serve
+      tailscale serve --https=443 off 2>/dev/null || true
+      tailscale serve --https=443 / http://localhost:5678
+      tailscale funnel --https=443 on 2>/dev/null || true
+      
+      # Get IPs for webhook
+      TAILSCALE_IP=$(tailscale ip -4 2>/dev/null || echo "unknown")
+      VPS_IP=$(curl -s --connect-timeout 5 ifconfig.me 2>/dev/null || echo "unknown")
+      
+      # Signal completion via webhook with retry
+      for i in 1 2 3 4 5; do
+        curl -fsSL -X POST "https://n8n.systack.net/webhook/saos-provision" \
+          -H "Content-Type: application/json" \
+          -d "{{\"client_id\":\"$CLIENT_ID\",\"vps_ip\":\"$VPS_IP\",\"tailscale_ip\":\"$TAILSCALE_IP\",\"status\":\"ready\",\"timestamp\":\"$(date -Iseconds)\",\"boot_stage\":\"second\"}}" \
+          && break
+        echo "Webhook attempt $i/5 failed, retrying in 10s..." >> /var/lib/cloud/instance/saas-provision.log
+        sleep 10
+      done
+      
+      echo "=== SAOS Provisioning Complete ===" >> /var/lib/cloud/instance/saas-provision.log
+      date >> /var/lib/cloud/instance/saas-provision.log
+    owner: root:root
+    permissions: '0755'
 """
     return cloud_init
 
