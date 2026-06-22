@@ -1,9 +1,11 @@
 # SAOS Plan Specifications (Updated June 2026)
 
-## Business Fleet
+## Business Fleet — 7 Agents
 
 | Specification | Value |
 |---------------|-------|
+| **Agents** | 7 (SOL, VALI, PESSI, ORACLE, ATLAS, ASSEMBLY, JURIS) |
+| **Agent Functions** | Orchestration, build, deployment, validation, risk analysis, architecture, knowledge |
 | **Vultr Plan** | vhp-8c-16gb-amd |
 | **vCPUs** | 8 |
 | **RAM** | 16GB |
@@ -13,10 +15,12 @@
 | **Monthly Cost** | $96/mo |
 | **Stripe Price** | $299/mo |
 
-## Enterprise Fleet
+## Enterprise Fleet — 10 Agents
 
 | Specification | Value |
 |---------------|-------|
+| **Agents** | 10 (Business Fleet + CODY, CHATTY, GENI) |
+| **Agent Functions** | Everything in Business + build, communication, creative |
 | **Vultr Plan** | voc-g-8c-32gb-160s-amd |
 | **vCPUs** | 8 |
 | **RAM** | 32GB |
@@ -30,6 +34,8 @@
 
 | Feature | Business | Enterprise |
 |---------|----------|------------|
+| **Agent Count** | 7 | 10 |
+| **Extra Agents** | — | CODY (build), CHATTY (communication), GENI (creative) |
 | vCPUs | 8 | 8 |
 | RAM | 16GB | 32GB |
 | Plan Type | High Performance | Optimized Cloud |

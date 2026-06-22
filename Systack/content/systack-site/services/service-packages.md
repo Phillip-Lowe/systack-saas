@@ -270,18 +270,20 @@ Your AI sidekick that actually works:
 | **SAOS Enterprise Fleet** | **$799/mo** | **On-premise** | Large team (10+), regulated industries |
 
 #### SAOS Business Fleet — $299/mo
-Multi-agent team for your business:
+**7-agent AI fleet for growing businesses.** SOL, VALI, PESSI, ORACLE, ATLAS, ASSEMBLY, JURIS — orchestration, build, deployment, validation, risk analysis, architecture, and knowledge management.
 - Everything in Personal+
-- **Team collaboration** via Slack
+- **7 core agents** with dedicated 16GB VPS
 - **Invoice processing** pipeline
 - **Lead qualification** and routing
 - **Customer support drafting**
+- Legal review & compliance clearance (JURIS)
 - Up to 5 team members
 - **10,000 n8n runs/mo**
 
 #### SAOS Enterprise Fleet — $799/mo
-Full private automation suite:
+**10-agent fleet with engagement & compliance.** Everything in Business Fleet plus CODY (build), CHATTY (communication), and GENI (creative) — plus on-premise deployment.
 - Everything in Business Fleet
+- **Plus 3 agents:** CODY, CHATTY, GENI
 - **On-premise deployment** — hardware in your building
 - **HIPAA-grade privacy** — zero cloud exposure
 - **Dedicated hardware** — Mac Studio or Linux + RTX 4090
