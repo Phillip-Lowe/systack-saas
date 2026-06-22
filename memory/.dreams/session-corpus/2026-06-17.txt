@@ -1,0 +1,2 @@
+[sol/sessions/sol/e36cc3d0-d95a-4382-8ee9-e29091a748d8.jsonl.reset.2026-06-17T09-45-09.468Z#L5] User: what the dashoard address
+[sol/sessions/sol/e36cc3d0-d95a-4382-8ee9-e29091a748d8.jsonl.reset.2026-06-17T09-45-09.468Z#L8] Assistant: Which dashboard do you mean? - **n8n** (automation/workflows): `https://n8n.systack.net` or `https://localhost:5678` - **Utopia Deli order page**: `https://order.theutopiadeli.com/pickup-order/` - **Utopia Deli catering form**: `https://

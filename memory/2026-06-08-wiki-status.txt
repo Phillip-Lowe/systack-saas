@@ -1,0 +1,7 @@
+=== Wiki Status After iCloud Move ===
+Date: Mon Jun  8 09:31:55 CDT 2026
+Vault: ~/Library/Mobile Documents/com~apple~CloudDocs/OpenClaw Wiki
+Symlink: ~/.openclaw/wiki/main -> iCloud path
+Config: ~/.openclaw/openclaw.json updated
+Old cron: disabled (8de4d3d8-e0aa-434c-8eda-98089bfef7d0)
+Status: BIDIRECTIONAL SYNC ACTIVE

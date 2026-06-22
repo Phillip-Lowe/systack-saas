@@ -1,0 +1,492 @@
+# Light Sleep
+
+- Candidate: SAOS Business Tier Verification — 2026-06-19: **Instance:** e8c2ceda-8580-4942-a912-cf94744f78ed **IP:** 64.177.114.129 **Duration:** ~10 minutes **Cost:** ~$0.02 (pro-rated hourly)
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:3-6
+  - recalls: 0
+  - status: staged
+- Candidate: SAOS Business Tier Verification — 2026-06-19: **Status:** DESTROYED after verification
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:7-7
+  - recalls: 0
+  - status: staged
+- Candidate: Hardware Verified: | Spec | Value | |------|-------| | CPU | AMD EPYC-Milan, 8 cores | | RAM | 16 GB |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:13-16
+  - recalls: 0
+  - status: staged
+- Candidate: Hardware Verified: | Disk | ~25 GB SSD | | Plan | `vhp-8c-16gb-amd` ($96/mo) |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:17-18
+  - recalls: 0
+  - status: staged
+- Candidate: Services Verified: | Service | Status | Details | |---------|--------|---------| | **Tailscale** | ✅ JOINED | 100.110.106.92 | | **Tailscale DNS** | ✅ | saos-business-verify-001.tail573d57.ts.net |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:22-25
+  - recalls: 0
+  - status: staged
+- Candidate: Services Verified: | **Tailscale Tags** | ✅ | `['tag:saos-client']` | | **Ollama** | ✅ RUNNING | qwen2.5:7b loaded (4.7GB) | | **Model Inference** | ✅ WORKING | "Hello there! How can I assist you today?" | | **n8n** | ✅ RUNNING | Port 5678 mapped |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:26-29
+  - recalls: 0
+  - status: staged
+- Candidate: Services Verified: | **nginx** | ✅ | HTTP/1.1 200 OK | | **UFW** | ✅ | All required ports open | | **fail2ban** | ✅ | Enabled |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:30-32
+  - recalls: 0
+  - status: staged
+- Candidate: Tailscale Auth Key Invalid: **Symptom:** `invalid key: API key kKZygXgrAn11CNTRL not valid` **Cause:** Auth key expired or malformed during cloud-init **Fix:** Generated fresh auth key with proper capabilities **Resolution:** Fresh key `tskey-auth-kLiM6eJ7G111CNTRL-7Ybg5eLrwNZ6RW
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:37-40
+  - recalls: 0
+  - status: staged
+- Candidate: n8n Permission Denied: **Symptom:** `EACCES: permission denied, open '/home/node/.n8n/config'` **Cause:** Volume mount /opt/n8n owned by root, n8n container runs as node (UID 1000) **Fix:** Either chown -R 1000:1000 /opt/n8n or run container as --user root **Resolution:** Started
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:43-46
+  - recalls: 0
+  - status: staged
+- Candidate: n8n Permission Denied: **Template Fix Needed:** Add `chown -R 1000:1000 /opt/n8n` before docker run
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:47-47
+  - recalls: 0
+  - status: staged
+- Candidate: Docker Name Conflict: **Symptom:** `Conflict. The container name "/n8n" is already in use` **Cause:** Previous n8n container exists from failed start **Fix:** `docker rm -f n8n` before restart **Template Fix Needed:** Add `docker rm -f n8n 2>/dev/null || true` before run
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:50-53
+  - recalls: 0
+  - status: staged
+- Candidate: Tailscale Network (Verified): 100.110.106.92 saos-business-verify-001 linux 100.79.244.34 iphone-14-pro-max iOS 100.84.164.70 phillips-macbook-air macOS
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:57-59
+  - recalls: 0
+  - status: staged
+- Candidate: Cloud-init Improvements Needed: **n8n volume permissions:** Add `chown -R 1000:1000 /opt/n8n` before docker run; **Docker cleanup:** Add `docker rm -f n8n 2>/dev/null || true` before docker run; **Tailscale retry:** Add retry logic for auth key (regenerate if invalid); **OpenClaw
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:64-67
+  - recalls: 0
+  - status: staged
+- Candidate: Plan ID Correction: **Old (invalid):** `vhp-4c-16gb` — doesn't exist in Vultr catalog; **New (working):** `vhp-8c-16gb-amd` — 8 cores, 16GB, AMD EPYC, $96/mo
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:70-71
+  - recalls: 0
+  - status: staged
+- Candidate: Commits: `bea045c` — Fix: update Business tier plan to vhp-8c-16gb-amd
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:74-74
+  - recalls: 0
+  - status: staged
+- Candidate: Cost: ~$0.02 for ~10 minutes of runtime; $96/mo if left running
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:77-78
+  - recalls: 0
+  - status: staged
+- Candidate: Conclusion: **Full SAOS stack works on Business tier.** All services verified including model inference. Ready for client provisioning.
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-saos-business-tier-verification.md:81-81
+  - recalls: 0
+  - status: staged
+- Candidate: What Happened: Identified new meal prep images in `utopia-deli-revamp/images/Meal Prep/` and matched them to current menu items in `catering/catering-form.js`.
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:5-5
+  - recalls: 0
+  - status: staged
+- Candidate: Images Copied → `catering/images/`: | Source File | → Menu Item | New File | |---|---|---| | `Mediterranean Harvest Bowl.JPG` | Mediterranean Harvest Bowl | `meal-mediterranean-harvest.jpg` | | `Thai peanut crunch bowl.JPG` | Thai Peanut Crunch Bowl | `meal-thai-peanut-crunch.jpg
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:9-12
+  - recalls: 0
+  - status: staged
+- Candidate: Images Copied → `catering/images/`: | `Eggplant parmesean lasagna.JPG` | Eggplant Parmesan | `meal-eggplant-parm.jpg` | | `Mango Chia Seed Pudding.JPG` | Mango Chia Seed Pudding | `dessert-mango-chia.jpg` | | *(already staged)* | Apple Pie | `apple-pie.jpg` | | *(already staged)*
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:13-16
+  - recalls: 0
+  - status: staged
+- Candidate: Updated: `catering/catering-form.js` — Set `photo` paths for all matched items
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:19-19
+  - recalls: 0
+  - status: staged
+- Candidate: Left as-is (placeholders): Street Corn Taco Bowl; Nashville Hot Lentil Bowl; Cajun Red Beans & Dirty Rice Bowl; Loaded BBQ Potato Bowl
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:22-25
+  - recalls: 0
+  - status: staged
+- Candidate: Unused images remaining in revamp: `Designer.png`, `Designer-2.png`, `Designer-3.png`, `Designer-4.png` (AI-generated, can't identify — need user input); `IMG_2757.JPG` (new photo, can't identify); `IMG_2735-2741.JPG` (old photos, already used in June 11 batch)
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:28-30
+  - recalls: 0
+  - status: staged
+- Candidate: Commit: **Repo:** `Phillip-Lowe/utopia-deli-order`; **Commit:** `ec69d42` — "feat(menu): Week of June 18 — new meal prep photos"; **Pushed:** ✅
+  - confidence: 0.62
+  - evidence: memory/2026-06-18-meal-prep-photos-update.md:33-35
+  - recalls: 0
+  - status: staged
+- Candidate: Session Save — 2026-06-20: **Time:** 00:17 CDT **Builder:** SOL **Status:** Session end
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:2-4
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): Built comprehensive onboarding/legal paperwork for every Systack service:
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:11-11
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): | Document | Lines | Purpose | |----------|-------|---------| | `SYSTACK-SERVICE-AGREEMENT-TEMPLATE.md` | ~380 | Master agreement + universal terms | | `SAOS-SERVICE-AGREEMENT.md` (Appendix A) | ~280 | AI Agent Fleet specifics |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:13-16
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): | `AUTOMATION-SERVICE-AGREEMENT.md` (Appendix B) | ~260 | Custom workflow specifics | | `BUSINESS-SYSTEMS-AGREEMENT.md` (Appendix C) | ~350 | Booking/ordering/invoice specifics | | `DATA-PROCESSING-ADDENDUM.md` | ~260 | DPA + HIPAA BAA t
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:17-20
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): **Total:** 1,622+ lines of legal framework
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:22-22
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): **Phillip's Decisions Applied:**
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:24-24
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): Physical address: 4015 Holt St Apt B, LR, AR 72204 (flagged as temporary); Insurance: Deferred; Arbitration: Keep it (Arkansas recognizes); Enterprise liability cap: TBD with attorney
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:25-28
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): **NEW:** Get professional business address — added to TODO list
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:29-29
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS: Service Agreement Suite (COMPLETE): **Files committed:** `9490fd5`, `e2ec6db`, `5ee8305`
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:31-31
+  - recalls: 0
+  - status: staged
+- Candidate: Open Tasks Added to HEARTBEAT.md: [ ] Get professional business address (virtual mailbox, registered agent, or UPS Store)
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:34-34
+  - recalls: 0
+  - status: staged
+- Candidate: Commits This Session: | Commit | Message | |--------|---------| | `9490fd5` | JURIS: Service agreements for SAOS, Automation, Business Systems + DPA | | `e2ec6db` | JURIS: Update physical address to 4015 Holt St Apt B |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:40-43
+  - recalls: 0
+  - status: staged
+- Candidate: Commits This Session: | `5ee8305` | JURIS: Flag business address as temporary, add to TODO list |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20.md:44-44
+  - recalls: 0
+  - status: staged
+- Candidate: Mod 1 Context Capture: **Date:** 2026-06-20 01:15 CDT **Status:** Ready for external storage migration
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:2-3
+  - recalls: 0
+  - status: staged
+- Candidate: What is Mod 1: Fashion/clothing brand operated by Phillip Lowe.
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:9-9
+  - recalls: 0
+  - status: staged
+- Candidate: Contents: | Category | Description | |----------|-------------| | Documents/Design | Color templates, branding rules, designer guidelines | | Documents/Business License | PDFs — business legal documentation |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:13-16
+  - recalls: 0
+  - status: staged
+- Candidate: Contents: | Documents/Excel | Size charts, prototype specs | | Documents/Word | Color usage guides | | Documents/Collaboration/Influencer | Influencer kit PDFs | | Images/Advertising/Mockups/Videos | Video files (.mp4, .MOV) — **17GB, the space hog** |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:17-20
+  - recalls: 0
+  - status: staged
+- Candidate: Contents: | Images/Banners | Banner designs | | Images/Designs | Product designs | | Images/Logos | Brand logos |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:21-23
+  - recalls: 0
+  - status: staged
+- Candidate: Stats: **Total files:** 1,972; **Total size:** ~17GB (mostly video files); **Location:** workspace/sol/Mod 1/
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:27-29
+  - recalls: 0
+  - status: staged
+- Candidate: Action Required: Move to external storage device. Do NOT keep in git repo — these are binary assets (videos, images) that don't belong in source control.
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:33-33
+  - recalls: 0
+  - status: staged
+- Candidate: Action Required: *Saved before migration*
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-mod1-context.md:36-36
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS MEMORY.md Created: Full curated memory for JURIS agent; Includes: compliance framework, data sensitivity tiers, regulatory watch list, fleet collaboration, active projects, credentials; Saved to `~/.openclaw/workspaces/juris/MEMORY.md`
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:6-8
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS AGENTS.md Updated: JURIS-specific enforcement rules (not generic template); Deployment gate guard, legal escalation triggers, tool restrictions, wiki integration; Saved to `~/.openclaw/workspaces/juris/AGENTS.md`
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:11-13
+  - recalls: 0
+  - status: staged
+- Candidate: JURIS SOUL.md + IDENTITY.md Updated: Added compliance framework access (wiki paths); Added escalation triggers (>$10K, HIPAA, confidence <0.85); Saved to existing files
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:16-18
+  - recalls: 0
+  - status: staged
+- Candidate: Agent Learning System Complete Redesign: **ORACLE-CURRICULUM.md:** 4-week novel comparative curriculum; **AGENT-ROTATION-SCHEDULE.md:** 10-agent rotation with resource management; **Key decisions:**; SOL/CODY/ATLAS: Weekly (Mon/Tue/Wed)
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:21-24
+  - recalls: 0
+  - status: staged
+- Candidate: Agent Learning System Complete Redesign: All others: Bi-weekly (Thu-Sun alternating); ORACLE: On-demand only (any agent can reach out); GENI: Cloud-only (Kling/Runway), no local video on 8GB RAM; Real API keys verified: Vultr, Tailscale, n8n in credentials/ folder
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:25-28
+  - recalls: 0
+  - status: staged
+- Candidate: Cron Job Fixed: Re-enabled `85ec8a79-b646-451c-82bb-5a2d3e7d65f8`; Model: `ollama/qwen2.5-coder:7b` (local, no timeout); Timeout: 1800s (30 minutes); Payload: Updated with new curriculum instructions
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:31-34
+  - recalls: 0
+  - status: staged
+- Candidate: SOL MEMORY.md Updated: Vultr/Tailscale/n8n API keys marked as "✅ obtained"; Credential locations documented
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:37-38
+  - recalls: 0
+  - status: staged
+- Candidate: Files Created/Updated: | File | Action | |------|--------| | `~/.openclaw/workspaces/juris/MEMORY.md` | Created | | `~/.openclaw/workspaces/juris/AGENTS.md` | Updated |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:42-45
+  - recalls: 0
+  - status: staged
+- Candidate: Files Created/Updated: | `~/.openclaw/workspaces/juris/SOUL.md` | Updated | | `~/.openclaw/workspaces/juris/IDENTITY.md` | Updated | | `memory/ORACLE-CURRICULUM.md` | Rewritten | | `memory/AGENT-ROTATION-SCHEDULE.md` | Rewritten |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:46-49
+  - recalls: 0
+  - status: staged
+- Candidate: Files Created/Updated: | `~/.openclaw/workspaces/sol/MEMORY.md` | Updated | | Cron job `85ec8a79...` | Re-enabled + updated payload |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:50-51
+  - recalls: 0
+  - status: staged
+- Candidate: Next: Monday 10 AM CDT: SOL — Auto-Provisioning with real Vultr API; Agent learning system active, 4-week curriculum running; JURIS integrated into fleet rotation (bi-weekly Sundays)
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:55-57
+  - recalls: 0
+  - status: staged
+- Candidate: Next: *Session ended: 2026-06-20 02:04 CDT* *All changes committed to memory*
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-session-save.md:60-61
+  - recalls: 0
+  - status: staged
+- Candidate: Site Updates (All Pushed to GitHub Pages): | File | Change | |------|--------| | `pickup-order/index.html` | Added consent text under EMAIL field | | `catering/index.html` | Added consent text under EMAIL field |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:7-10
+  - recalls: 0
+  - status: staged
+- Candidate: Site Updates (All Pushed to GitHub Pages): | `pickup-order/privacy.html` | New: SMS/email terms, opt-out, data protection | | `privacy.html` | New: root copy for link consistency | | `pickup-order/menu-data.js` | Juice: single option $5.00 10oz | | `catering/catering-form.js` | J
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:11-14
+  - recalls: 0
+  - status: staged
+- Candidate: Site Updates (All Pushed to GitHub Pages): | `privacy.html` + `pickup-order/privacy.html` | Clickable logo, footer slogan "It's just good food.", footer links to homepage |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:15-15
+  - recalls: 0
+  - status: staged
+- Candidate: Database: **Script:** `scripts/deli_square_data_pg.py`; **Pulls:** 5,000 customers from Square API; **Stores:** Local Postgres `utopia_deli.contacts`; **Export:** `utopia-contacts.csv` (356 after cleanup)
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:18-21
+  - recalls: 0
+  - status: staged
+- Candidate: Database: **Cleanup:** Removed 5,179 no-contact, 71 fake names, deduped by square_id; **Result:** 333 with email, 256 with phone, 233 with both
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:22-23
+  - recalls: 0
+  - status: staged
+- Candidate: Documentation: **MESSAGING-RUNBOOK.md** — 5 email templates, 3 SMS templates, content pillars, weekly schedule
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:26-26
+  - recalls: 0
+  - status: staged
+- Candidate: Still To Do: | Task | Blocker | |------|---------| | Twilio signup | Phillip needs to do this | | n8n messaging workflows | Waiting on Twilio creds |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:29-32
+  - recalls: 0
+  - status: staged
+- Candidate: Still To Do: | Opt-out handling (STOP parser) | Post-Twilio | | List segmentation | Post-database setup |
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:33-34
+  - recalls: 0
+  - status: staged
+- Candidate: Git Commits: `66e2377` — feat: opt-in consent text + privacy page; `a1f7235` — feat: Square-to-Postgres sync script; `eda5fba` — docs: messaging runbook; `35ee03f` — fix: privacy page improvements + database cleanup
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:37-40
+  - recalls: 0
+  - status: staged
+- Candidate: Git Commits: `3d982ae` — fix: juice price + footer logo; `1fa70a6` — fix: consent text under email, juice $5 10oz; `9d96e84` — revert: juice back to original; `ccde0e5` — fix: juice single option 10oz $5.00
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:41-44
+  - recalls: 0
+  - status: staged
+- Candidate: Git Commits: `22f94b8` — fix: meal prep juice desc updated to 10oz
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:45-45
+  - recalls: 0
+  - status: staged
+- Candidate: Notes: Consent text placement moved from phone to email per user request; Juice simplified to single $5.00 10oz option; User confirmed they will revert juice pricing later when they bring back 16oz
+  - confidence: 0.62
+  - evidence: memory/2026-06-20-utopia-deli-v1-messaging.md:48-50
+  - recalls: 0
+  - status: staged
+- Candidate: SAOS Enterprise — Session Wrap-Up + Next Steps: **Date:** 2026-06-19 14:19 CDT **Session End:** Complete
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:2-3
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Built Today: | Component | Status | |-----------|--------| | Enterprise onboarding form | ✅ Deployed to systack.net/saos/onboard.html | | Business tier provisioning | ✅ Verified end-to-end |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:9-12
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Built Today: | Enterprise tier provisioning | ✅ Verified end-to-end | | Plan configuration | ✅ Updated (8 cores both tiers) | | PDF documentation | ✅ Updated with new specs | | Webhook endpoint | ✅ Active (n8n) |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:13-16
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Built Today: | Execution poller | ✅ Running | | Bridge | ✅ Running |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:17-18
+  - recalls: 0
+  - status: staged
+- Candidate: 🔴 High Priority (Next Session): | # | Task | Notes | |---|------|-------| | 1 | **Request Vultr spending limit increase** | Currently blocks enterprise provisioning when combined with other instances. Need limit raised for production. | | 2 | **Configure Stripe checkout success
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:26-29
+  - recalls: 0
+  - status: staged
+- Candidate: 🔴 High Priority (Next Session): | 3 | **Test full flow with real Stripe payment** | End-to-end: pay → redirect → form → provision | | 4 | **Build customer dashboard** | Login to view agents, VPS status, billing |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:30-31
+  - recalls: 0
+  - status: staged
+- Candidate: 🟡 Medium Priority: | # | Task | Notes | |---|------|-------| | 5 | **Update remaining PDFs** | Service Manual, Client Manual, Deployment Guide need plan specs | | 6 | **Add email notifications** | Send credentials email after VPS is ready |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:35-38
+  - recalls: 0
+  - status: staged
+- Candidate: 🟡 Medium Priority: | 7 | **Build multi-region support** | Enterprise tier should deploy to all selected regions | | 8 | **Add cost tracking** | Track Vultr costs per client |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:39-40
+  - recalls: 0
+  - status: staged
+- Candidate: 🟢 Nice to Have: | # | Task | Notes | |---|------|-------| | 9 | **Stripe webhook auto-provisioning** | Checkout complete → auto-trigger without manual form | | 10 | **SSL certificate automation** | Auto-issue certs for client domains |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:44-47
+  - recalls: 0
+  - status: staged
+- Candidate: 🟢 Nice to Have: | 11 | **Agent onboarding scripts** | Auto-configure fleet agents on VPS | | 12 | **Monitoring dashboard** | Real-time VPS health, agent status |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:48-49
+  - recalls: 0
+  - status: staged
+- Candidate: Context for Next Session: **Active Components:**
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:55-55
+  - recalls: 0
+  - status: staged
+- Candidate: Context for Next Session: Webhook: `https://n8n.systack.net/webhook/saos-enterprise-configure`; Workflow ID: `cAVqSVhMojNEa3hb`; Bridge PID: Check `ps aux | grep saos_provision_bridge`; Poller PID: Check `ps aux | grep n8n_execution_poller`
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:56-59
+  - recalls: 0
+  - status: staged
+- Candidate: Context for Next Session: **Plan Configuration:** | Tier | Plan | Cost | |------|------|------| | Business | vhp-8c-16gb-amd | $96/mo |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:61-64
+  - recalls: 0
+  - status: staged
+- Candidate: Context for Next Session: | Enterprise | voc-g-8c-32gb-160s-amd | $240/mo |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:65-65
+  - recalls: 0
+  - status: staged
+- Candidate: Context for Next Session: **Vultr Spending Limit:** Currently blocks enterprise when total nears limit.
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:67-67
+  - recalls: 0
+  - status: staged
+- Candidate: Files to Remember: | File | Purpose | |------|---------| | `systack-site/saos/onboard.html` | Customer-facing form | | `scripts/provision_vps.py` | VPS provisioning |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:73-76
+  - recalls: 0
+  - status: staged
+- Candidate: Files to Remember: | `scripts/n8n_execution_poller.py` | Execution detection | | `scripts/saos_provision_bridge.py` | Task processing | | `docs/SAOS-Plans-Updated-v1.0.pdf` | Updated specs |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:77-79
+  - recalls: 0
+  - status: staged
+- Candidate: Files to Remember: *Session complete. See you next time!*
+  - confidence: 0.62
+  - evidence: memory/2026-06-19.md:83-83
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Fixed: **Bug:** Deli order page combo items (fries/salad) not displayed to kitchen
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:5-5
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Fixed: **Root Cause:** Two issues in `pickup-order/order-form.js`:
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:7-7
+  - recalls: 0
+  - status: staged
+- Candidate: What Was Fixed: Cart display flattened all modifiers — combo choice looked like any other modifier; Webhook payload sent order items WITHOUT the `modifiers` array — kitchen/n8n never saw combo selections
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:8-9
+  - recalls: 0
+  - status: staged
+- Candidate: Files Modified: | File | Change | |------|--------| | `pickup-order/order-form.js` | `updateCart()` — Combo shown as 🍟 **COMBO: Fries** badge, separate from other modifiers | | `pickup-order/order-form.js` | `handleCheckout()` — Added `modifiers` array to `order_items` payload |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:15-18
+  - recalls: 0
+  - status: staged
+- Candidate: Files Modified: | `pickup-order/index.html` | Added `.cart-combo` CSS style (red accent badge) |
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:19-19
+  - recalls: 0
+  - status: staged
+- Candidate: Cart Display (Before → After): **Before:** > "BBQ, No Lettuce, Add Fries" (flat list)
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:23-24
+  - recalls: 0
+  - status: staged
+- Candidate: Cart Display (Before → After): **After:** > 🍟 **COMBO: Fries** > BBQ • No Lettuce
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:26-28
+  - recalls: 0
+  - status: staged
+- Candidate: Webhook Payload (Before → After): **Before:**
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:32-32
+  - recalls: 0
+  - status: staged
+- Candidate: Webhook Payload (Before → After): "item_id": "cowboy-chicken", "name": "Cowboy Chik'n Sandwich", "qty": 1, "price": 13.00
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:35-38
+  - recalls: 0
+  - status: staged
+- Candidate: Webhook Payload (Before → After): "modifiers": [ { "code": "C_SAUCE_BBQ", "label": "BBQ", "price_delta": 0.50 }, { "code": "C_COMBO_FRIES", "label": "Add Fries", "price_delta": 5.00 }
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:49-51
+  - recalls: 0
+  - status: staged
+- Candidate: Verification Performed: ✅ `node -c` syntax check passed; ✅ n8n workflow already handles `modifiers` array (backward compatible); ✅ Square API builder already iterates `item.modifiers` (safe additive change); ✅ Google Sheets logging JSON-stringifies full payload (no schema change
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:58-61
+  - recalls: 0
+  - status: staged
+- Candidate: Verification Performed: ✅ CSS isolated — no conflicts with existing styles
+  - confidence: 0.62
+  - evidence: memory/2026-06-19-combo-display-fix.md:62-62
+  - recalls: 0
+  - status: staged
