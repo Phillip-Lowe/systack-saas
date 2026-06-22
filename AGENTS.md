@@ -209,6 +209,45 @@ Think of it like a human reviewing their journal and updating their mental model
 
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 
+## 📥 "Save Everything Everywhere" — What It Actually Means
+
+**This is NOT a command to bulk-copy your entire workspace.**
+
+When the user says "save everything everywhere," they mean:
+
+### The Rule
+1. **Identify what matters** from the current session — decisions, lessons, fixes, discoveries
+2. **Route each piece to its relevant home** based on what it IS, not just "dump it all"
+3. **Never** copy the entire workspace or duplicate existing files just to "save"
+
+### Where Things Go
+| If it's... | Save to... |
+|-----------|-----------|
+| Raw session events, timestamps, what happened | `memory/YYYY-MM-DD.md` |
+| Distilled lessons, decisions, system rules | `MEMORY.md` |
+| Agent-specific pitfall or learning | `memory/agent-learnings/<AGENT>-<topic>.md` |
+| Project spec, architecture, plan | Relevant project file or `plans/` |
+| Something that should survive long-term, searchable | Wiki (if active) |
+| Credential, API key, local config | `TOOLS.md` or secure credential store |
+| Code change, deployment | Git commit with clear message |
+| Draft content (posts, emails) | `memory/linkedin-posts/` or relevant draft folder |
+
+### What NOT to Do
+- ❌ Don't `git add -A` and commit the entire workspace
+- ❌ Don't duplicate files from `memory/` into `memory/recovered/` just to "save"
+- ❌ Don't copy wiki content into git unless it's actually changed
+- ❌ Don't create redundant copies of the same information
+- ❌ Don't treat "everywhere" as literally "every place that exists"
+
+### What TO Do
+- ✅ Summarize the session's key outputs
+- ✅ Route each output to its logical home
+- ✅ Commit only what's new or changed
+- ✅ Write a commit message that says what and why
+- ✅ Ask if unsure where something belongs
+
+**Remember:** The user wants *organized persistence*, not *chaotic duplication*.
+
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
